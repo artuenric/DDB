@@ -29,6 +29,8 @@ public class DDBNode {
     public void start() throws IOException {
         new Thread(this::heartbeatTask).start();
         // Escuta em todas as interfaces do container
+        CDCListener cdc = new CDCListener(System.getenv("DB_URL"), "root", "root");
+        cdc.start();
         ServerSocket server = new ServerSocket(5000);
         System.out.println("[Nó " + myIp + "] Ouvindo na porta 5000...");
         while (true) {
