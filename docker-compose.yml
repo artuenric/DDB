@@ -1,96 +1,37 @@
 version: '3.8'
 
 services:
-  # --- NÓ 01 ---
-  db1:
+  db:
     image: mysql:8.0
-    container_name: db1
-    command: --server-id=1 --log-bin=mysql-bin --binlog-format=ROW
+    # O server-id é extraído do último número do IP para ser único
+    command: --server-id=${ID_NODO} --log-bin=mysql-bin --binlog-format=ROW
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
       MYSQL_DATABASE: ddb_distributed
     volumes:
       - ./scripts/setup.sql:/docker-entrypoint-initdb.d/setup.sql
-    networks:
-      ddb_net:
-        ipv4_address: 10.10.0.10
-
-  node1:
-    build: .
-    container_name: node1
-    depends_on:
-      - db1
-    environment:
-      - MY_IP=10.10.0.101
-      - ALL_NODES=10.10.0.101,10.10.0.102,10.10.0.103
-      - DB_URL=jdbc:mysql://10.10.0.10:3306/ddb_distributed?allowMultiQueries=true
     ports:
-      - "5001:5000"
+      - "3306:3306"
     networks:
-      ddb_net:
-        ipv4_address: 10.10.0.101
+      - ddb_net
 
-  # --- NÓ 02 ---
-  db2:
-    image: mysql:8.0
-    container_name: db2
-    command: --server-id=2 --log-bin=mysql-bin --binlog-format=ROW
+  node:
+    build: .
+    container_name: ddb_node
+    depends_on:
+      - db
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: ddb_distributed
+      - MY_IP=${MY_IP}
+      - ALL_NODES=${ALL_NODES}
+      - DB_URL=jdbc:mysql://db:3306/ddb_distributed?allowMultiQueries=true
+      - DISPLAY=${DISPLAY}
+    ports:
+      - "5000:5000"
     volumes:
-      - ./scripts/setup.sql:/docker-entrypoint-initdb.d/setup.sql
+      - /tmp/.X11-unix:/tmp/.X11-unix # Mapeamento para interface gráfica
     networks:
-      ddb_net:
-        ipv4_address: 10.10.0.20
-
-  node2:
-    build: .
-    container_name: node2
-    depends_on:
-      - db2
-    environment:
-      - MY_IP=10.10.0.102
-      - ALL_NODES=10.10.0.101,10.10.0.102,10.10.0.103
-      - DB_URL=jdbc:mysql://10.10.0.20:3306/ddb_distributed?allowMultiQueries=true
-    ports:
-      - "5002:5000"
-    networks:
-      ddb_net:
-        ipv4_address: 10.10.0.102
-
-  # --- NÓ 03 ---
-  db3:
-    image: mysql:8.0
-    container_name: db3
-    command: --server-id=3 --log-bin=mysql-bin --binlog-format=ROW
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: ddb_distributed
-    volumes:
-      - ./scripts/setup.sql:/docker-entrypoint-initdb.d/setup.sql
-    networks:
-      ddb_net:
-        ipv4_address: 10.10.0.30
-
-  node3:
-    build: .
-    container_name: node3
-    depends_on:
-      - db3
-    environment:
-      - MY_IP=10.10.0.103
-      - ALL_NODES=10.10.0.101,10.10.0.102,10.10.0.103
-      - DB_URL=jdbc:mysql://10.10.0.30:3306/ddb_distributed?allowMultiQueries=true
-    ports:
-      - "5003:5000"
-    networks:
-      ddb_net:
-        ipv4_address: 10.10.0.103
+      - ddb_net
 
 networks:
   ddb_net:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 10.10.0.0/24

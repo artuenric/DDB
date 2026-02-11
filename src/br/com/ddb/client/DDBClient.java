@@ -10,7 +10,7 @@ public class DDBClient extends JFrame {
     private JTextArea query = new JTextArea(5, 40);
     private JTextArea result = new JTextArea(15, 50);
     private JTextField host = new JTextField("localhost", 10);
-    private JTextField port = new JTextField("5001", 5);
+    private JTextField port = new JTextField("5000", 5);
 
     public DDBClient() {
         setTitle("DDB MySQL Client");

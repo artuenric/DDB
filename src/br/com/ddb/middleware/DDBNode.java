@@ -17,10 +17,10 @@ public class DDBNode {
         return this.db;
     }
 
-    public DDBNode(String myIp, String nodesRaw, String dbUrl) throws Exception {
+    public DDBNode(String myIp, String nodesRaw, String dbUrl, String dbPass) throws Exception {
         this.myIp = myIp;
         this.allNodes = Arrays.asList(nodesRaw.split(","));
-        this.db = new Database(dbUrl, "root", "root");
+        this.db = new Database(dbUrl, "root", dbPass);
         this.election = new BullyElection(this);
         this.replication = new Replication(this);
         this.coordinatorIp = allNodes.get(allNodes.size() - 1);
@@ -29,7 +29,9 @@ public class DDBNode {
     public void start() throws IOException {
         new Thread(this::heartbeatTask).start();
         // Escuta em todas as interfaces do container
-        CDCListener cdc = new CDCListener(this, System.getenv("DB_URL"), "root", "root");        cdc.start();
+        String pass = System.getenv("DB_PASS");
+        CDCListener cdc = new CDCListener(this, System.getenv("DB_URL"), "root", pass);
+        cdc.start();
         ServerSocket server = new ServerSocket(5000);
         System.out.println("[Nó " + myIp + "] Ouvindo na porta 5000...");
         while (true) {
@@ -179,7 +181,8 @@ public class DDBNode {
         String ip = System.getenv("MY_IP");
         String nodes = System.getenv("ALL_NODES");
         String dbUrl = System.getenv("DB_URL");
-        new DDBNode(ip, nodes, dbUrl).start();
+        String dbPass = System.getenv("DB_PASS");
+        new DDBNode(ip, nodes, dbUrl, dbPass).start();
     }
 
 
