@@ -41,4 +41,37 @@ public class Database {
             return "Erro SQL Local: " + e.getMessage();
         }
     }
+
+    // 1. Lista todas as tabelas do banco
+    public java.util.List<String> getAllTables() {
+        java.util.List<String> tables = new java.util.ArrayList<>();
+        try {
+            DatabaseMetaData meta = connection.getMetaData();
+            // Pega apenas tabelas do tipo TABLE (ignora views, system tables)
+            try (ResultSet rs = meta.getTables(connection.getCatalog(), null, "%", new String[]{"TABLE"})) {
+                while (rs.next()) {
+                    tables.add(rs.getString("TABLE_NAME"));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("[Database] Erro ao listar tabelas: " + e.getMessage());
+        }
+        return tables;
+    }
+
+    // 2. Lista as colunas de uma tabela na ordem correta
+    public java.util.List<String> getTableColumns(String tableName) {
+        java.util.List<String> columns = new java.util.ArrayList<>();
+        try {
+            DatabaseMetaData meta = connection.getMetaData();
+            try (ResultSet rs = meta.getColumns(connection.getCatalog(), null, tableName, null)) {
+                while (rs.next()) {
+                    columns.add(rs.getString("COLUMN_NAME"));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("[Database] Erro colunas (" + tableName + "): " + e.getMessage());
+        }
+        return columns;
+    }
 }
