@@ -38,6 +38,22 @@ public class DDBNode {
         }
     }
 
+    public void propagarAlteracaoCDC(String sql) {
+        System.out.println("[CDC -> Rede] Propagando alteração detectada manualmente...");
+
+        if (myIp.equals(coordinatorIp)) {
+            // Se eu sou o coordenador, assumo o comando e inicio o 2PC.
+            // OBS: O 2PC tentará aplicar o SQL em todos os nós, INCLUSIVE neste aqui novamente.
+            // - Se for INSERT: Vai dar erro de "Duplicate entry" localmente (inofensivo, pois o dado já está aqui).
+            // - Se for UPDATE/DELETE: Vai sobrescrever (idempotente).
+            replication.executeTwoPhaseCommit(sql);
+        } else {
+            // Se não sou coordenador, envio para ele como se fosse uma requisição comum
+            // O Coordenador vai receber e iniciar o 2PC global.
+            sendMessage(coordinatorIp, new Message("QUERY", myIp, sql));
+        }
+    }
+
     private void handle(Socket s) {
         try (ObjectInputStream in = new ObjectInputStream(s.getInputStream());
              ObjectOutputStream out = new ObjectOutputStream(s.getOutputStream())) {

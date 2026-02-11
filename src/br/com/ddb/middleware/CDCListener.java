@@ -81,8 +81,8 @@ public class CDCListener {
                 case "DELETE": sql = BinlogTranslator.convertDelete((DeleteRowsEventData) data, tableName, cols); break;
             }
 
-            System.out.println("[CDC -> SQL] " + sql);
-            // TODO: Próxima etapa -> Enviar para o Coordenador
+            System.out.println("[CDC -> SQL] Detectado: " + sql);
+            node.propagarAlteracaoCDC(sql);
         }
     }
 }
