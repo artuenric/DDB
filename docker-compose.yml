@@ -23,7 +23,7 @@ services:
     environment:
       - MY_IP=10.10.0.101
       - ALL_NODES=10.10.0.101,10.10.0.102,10.10.0.103
-      - DB_URL=jdbc:mysql://10.10.0.10:3306/ddb_distributed
+      - DB_URL=jdbc:mysql://10.10.0.10:3306/ddb_distributed?allowMultiQueries=true
     ports:
       - "5001:5000"
     networks:
@@ -52,7 +52,7 @@ services:
     environment:
       - MY_IP=10.10.0.102
       - ALL_NODES=10.10.0.101,10.10.0.102,10.10.0.103
-      - DB_URL=jdbc:mysql://10.10.0.20:3306/ddb_distributed
+      - DB_URL=jdbc:mysql://10.10.0.20:3306/ddb_distributed?allowMultiQueries=true
     ports:
       - "5002:5000"
     networks:
@@ -81,7 +81,7 @@ services:
     environment:
       - MY_IP=10.10.0.103
       - ALL_NODES=10.10.0.101,10.10.0.102,10.10.0.103
-      - DB_URL=jdbc:mysql://10.10.0.30:3306/ddb_distributed
+      - DB_URL=jdbc:mysql://10.10.0.30:3306/ddb_distributed?allowMultiQueries=true
     ports:
       - "5003:5000"
     networks:
