@@ -29,11 +29,28 @@ public class DDBNode {
     public void start() throws IOException {
         new Thread(this::heartbeatTask).start();
         // Escuta em todas as interfaces do container
+        CDCListener cdc = new CDCListener(this, System.getenv("DB_URL"), "root", "root");        cdc.start();
         ServerSocket server = new ServerSocket(5000);
         System.out.println("[Nó " + myIp + "] Ouvindo na porta 5000...");
         while (true) {
             Socket s = server.accept();
             new Thread(() -> handle(s)).start();
+        }
+    }
+
+    public void propagarAlteracaoCDC(String sql) {
+        System.out.println("[CDC -> Rede] Propagando alteração detectada manualmente...");
+
+        if (myIp.equals(coordinatorIp)) {
+            // Se eu sou o coordenador, assumo o comando e inicio o 2PC.
+            // OBS: O 2PC tentará aplicar o SQL em todos os nós, INCLUSIVE neste aqui novamente.
+            // - Se for INSERT: Vai dar erro de "Duplicate entry" localmente (inofensivo, pois o dado já está aqui).
+            // - Se for UPDATE/DELETE: Vai sobrescrever (idempotente).
+            replication.executeTwoPhaseCommit(sql);
+        } else {
+            // Se não sou coordenador, envio para ele como se fosse uma requisição comum
+            // O Coordenador vai receber e iniciar o 2PC global.
+            sendMessage(coordinatorIp, new Message("QUERY", myIp, sql));
         }
     }
 
