@@ -19,6 +19,10 @@
 # Ignorar diretório de saída (compilados)
 out/
 
+# Ignorar banco local
+mysql-local/
+*.tar.xz
+
 # IDE
 .idea/
 
