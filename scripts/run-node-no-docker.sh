@@ -1,4 +1,5 @@
 #!/bin/bash
+cd "$(dirname "$0")/.." # Entra na raiz do projeto
 
 # 1. Defina o IP DESTA máquina física
 export MY_IP="10.113.50.66"

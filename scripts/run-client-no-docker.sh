@@ -1,4 +1,7 @@
 #!/bin/bash
+cd "$(dirname "$0")/.." # Entra na raiz do projeto
+
+#!/bin/bash
 
 echo "=> Iniciando a Interface do Cliente DDB..."
 

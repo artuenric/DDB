@@ -1,4 +1,5 @@
 #!/bin/bash
+cd "$(dirname "$0")/.." # Garante que o MySQL seja instalado na raiz
 
 # Valida se o ID do nó foi passado
 if [ -z "$1" ]; then
